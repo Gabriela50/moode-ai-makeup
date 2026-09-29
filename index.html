@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MOODÉ | Tu mood, tu estilo</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="logo">MOODÉ<span>.</span></div>
+
+        <nav>
+            <a href="#inicio">Inicio</a>
+            <a href="#mood">Mi Mood</a>
+            <a href="#scanner">Escanear</a>
+            <a href="#ia">IA</a>
+        </nav>
+    </header>
+
+
+    <!-- HERO -->
+    <section class="hero" id="inicio">
+
+        <div class="hero-text">
+
+            <p class="eyebrow">AI BEAUTY EXPERIENCE</p>
+
+            <h1>
+                Tu mood.<br>
+                Tu estilo.<br>
+                <span>Tu maquillaje.</span>
+            </h1>
+
+            <p class="hero-description">
+                MOODÉ analiza tu estilo, tu mood y tu rostro
+                para recomendarte un look de maquillaje personalizado.
+            </p>
+
+            <button class="main-button" onclick="startExperience()">
+                Escanear mi rostro ✦
+            </button>
+
+        </div>
+
+        <div class="hero-card">
+
+            <div class="hero-circle">
+                ✦
+            </div>
+
+            <p>PERSONALIZED BEAUTY</p>
+
+            <h3>
+                Beauty<br>
+                meets AI.
+            </h3>
+
+        </div>
+
+    </section>
+
+
+    <!-- MOOD -->
+    <section class="mood-section" id="mood">
+
+        <div class="section-title">
+
+            <p class="eyebrow">STEP 01</p>
+
+            <h2>
+                ¿Cuál es tu <span>mood?</span>
+            </h2>
+
+            <p>
+                Elige cómo quieres sentirte hoy.
+            </p>
+
+        </div>
+
+
+        <div class="mood-grid">
+
+            <button class="mood-card" onclick="selectMood('Radiante')">
+                <span>✨</span>
+                <strong>Radiante</strong>
+                <small>Glow y luminosidad</small>
+            </button>
+
+            <button class="mood-card" onclick="selectMood('Elegante')">
+                <span>🖤</span>
+                <strong>Elegante</strong>
+                <small>Sofisticada y clásica</small>
+            </button>
+
+            <button class="mood-card" onclick="selectMood('Romántica')">
+                <span>🌸</span>
+                <strong>Romántica</strong>
+                <small>Suave y femenina</small>
+            </button>
+
+            <button class="mood-card" onclick="selectMood('Tranquila')">
+                <span>🌙</span>
+                <strong>Tranquila</strong>
+                <small>Natural y relajada</small>
+            </button>
+
+        </div>
+
+        <p id="selectedMood" class="selected-mood">
+            Aún no has seleccionado un mood.
+        </p>
+
+    </section>
+
+
+    <!-- SCANNER -->
+    <section class="scanner-section" id="scanner">
+
+        <div class="section-title">
+
+            <p class="eyebrow">STEP 02</p>
+
+            <h2>
+                Escanea tu <span>rostro</span>
+            </h2>
+
+            <p>
+                Mira a la cámara y deja que MOODÉ analice tu estilo.
+            </p>
+
+        </div>
+
+
+        <div class="scanner-container">
+
+            <div class="camera-box">
+
+                <video id="camera" autoplay playsinline></video>
+
+                <div class="face-frame">
+
+                    <div class="corner top-left"></div>
+                    <div class="corner top-right"></div>
+                    <div class="corner bottom-left"></div>
+                    <div class="corner bottom-right"></div>
+
+                    <div class="scan-line"></div>
+
+                </div>
+
+                <div id="cameraMessage" class="camera-message">
+                    Cámara lista
+                </div>
+
+            </div>
+
+
+            <div class="scanner-controls">
+
+                <button class="camera-button" onclick="startCamera()">
+                    📷 Activar cámara
+                </button>
+
+                <button class="capture-button" onclick="capturePhoto()">
+                    ✦ Capturar rostro
+                </button>
+
+                <canvas id="photoCanvas"></canvas>
+
+                <p id="photoStatus">
+                    Primero activa la cámara.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- RESULT -->
+    <section class="ai-section" id="ia">
+
+        <div class="section-title">
+
+            <p class="eyebrow">STEP 03</p>
+
+            <h2>
+                Tu recomendación <span>MOODÉ</span>
+            </h2>
+
+            <p>
+                Nuestra inteligencia artificial combina tu mood
+                y el análisis visual para crear una recomendación.
+            </p>
+
+        </div>
+
+
+        <div class="ai-card" id="recommendation">
+
+            <div class="ai-icon">
+                ✦
+            </div>
+
+            <p>MOODÉ AI</p>
+
+            <h3>
+                Tu look está esperando...
+            </h3>
+
+            <span>
+                Selecciona un mood y captura tu rostro para generar
+                una recomendación personalizada.
+            </span>
+
+            <button onclick="generateLook()">
+                Generar mi look ✦
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- FEATURES -->
+    <section class="features">
+
+        <div class="feature">
+            <span>01</span>
+            <h3>Face Scan</h3>
+            <p>
+                Captura tu rostro utilizando la cámara.
+            </p>
+        </div>
+
+        <div class="feature">
+            <span>02</span>
+            <h3>Mood Analysis</h3>
+            <p>
+                Selecciona cómo quieres sentirte.
+            </p>
+        </div>
+
+        <div class="feature">
+            <span>03</span>
+            <h3>AI Look</h3>
+            <p>
+                Recibe una recomendación personalizada.
+            </p>
+        </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
+    <footer>
+
+        <div class="logo">
+            MOODÉ<span>.</span>
+        </div>
+
+        <p>
+            Beauty powered by technology.
+        </p>
+
+    </footer>
+
+
+    <script src="script.js"></script>
+
+</body>
+</html>
