@@ -1,19 +1,11 @@
-import React from "react";
-import { createRoot } from "react-dom/client";
-import { App } from "./App.js";
-import "../data/looks.js";
 import "../ai/ai-engine.js";
+import "../data/looks.js";
+import { App } from "./App.js";
 import "./output.css";
-
-function MoodeRoot() {
-  return React.createElement("div", {
-    dangerouslySetInnerHTML: { __html: App() }
-  });
-}
-
+import { supabase } from "./supabase.js";
 const rootElement = document.getElementById("root");
 if (rootElement) {
-  createRoot(rootElement).render(React.createElement(MoodeRoot));
+  rootElement.innerHTML = App();
 }
 
 let currentLanguage = localStorage.getItem("moodeLanguage") || "es";
@@ -21,6 +13,7 @@ let cameraStream = null;
 let selectedMood = "";
 let photoCaptured = false;
 let currentLook = null;
+let uploadedPhotoUrl = null;
 
 const translations = {
   es: {
@@ -44,6 +37,27 @@ const translations = {
     savedEmptyDescription: "Cuando guardes tus looks favoritos, aparecerán en esta sección.",
     savedCreate: "Crear un look",
     scannerTitle: "Analiza tu look",
+    preferencesTitle: "Personaliza tu look",
+    preferencesDescription: "Cuéntanos qué necesitas para adaptar tu recomendación.",
+    skinTypeLabel: "¿Cuál es tu tipo de piel?",
+    skinNormal: "Normal",
+    skinDry: "Seca",
+    skinOily: "Grasa",
+    skinCombination: "Mixta",
+    occasionLabel: "¿Para qué ocasión?",
+    occasionDaily: "Día a día",
+    occasionWork: "Universidad o trabajo",
+    occasionDate: "Cita especial",
+    occasionParty: "Fiesta o evento",
+    coverageLabel: "¿Qué cobertura prefieres?",
+    coverageLight: "Ligera y natural",
+    coverageMedium: "Media",
+    coverageFull: "Alta",
+    styleLabel: "¿Qué estilo te gusta?",
+    styleNatural: "Natural",
+    styleGlow: "Luminoso y glowy",
+    styleElegant: "Elegante",
+    styleCreative: "Creativo y atrevido",
     scannerDescription: "Elige tu mood, captura una foto y descubre una recomendación de maquillaje.",
     moodTitle: "¿Cómo quieres sentirte hoy?",
     moodRadiant: "Radiante",
@@ -93,6 +107,27 @@ const translations = {
     savedEmptyDescription: "When you save your favorite looks, they will appear in this section.",
     savedCreate: "Create a look",
     scannerTitle: "Explore your look",
+    preferencesTitle: "Personalize your look",
+    preferencesDescription: "Tell us what you need to tailor your recommendation.",
+    skinTypeLabel: "What is your skin type?",
+    skinNormal: "Normal",
+    skinDry: "Dry",
+    skinOily: "Oily",
+    skinCombination: "Combination",
+    occasionLabel: "What is the occasion?",
+    occasionDaily: "Everyday",
+    occasionWork: "University or work",
+    occasionDate: "Special date",
+    occasionParty: "Party or event",
+    coverageLabel: "What coverage do you prefer?",
+    coverageLight: "Light and natural",
+    coverageMedium: "Medium",
+    coverageFull: "Full",
+    styleLabel: "What style do you like?",
+    styleNatural: "Natural",
+    styleGlow: "Glowy",
+    styleElegant: "Elegant",
+    styleCreative: "Creative and bold",
     scannerDescription: "Choose your mood, take a photo, and discover a makeup recommendation.",
     moodTitle: "How do you want to feel today?",
     moodRadiant: "Radiant",
@@ -133,7 +168,102 @@ const moodNames = {
 function t(key) {
   return translations[currentLanguage][key] || translations.es[key] || key;
 }
+function applyAuthLanguage() {
+  const copy = {
+    es: {
+      eyebrow: "BELLEZA A TU MANERA",
+      description: "Descubre nuevas formas de expresarte con recomendaciones de maquillaje inspiradas en tu estilo y tu estado de ánimo.",
+      featureOne: "Tu estilo",
+      featureTwo: "Tus looks",
+      featureThree: "Tu mood",
+      footer: "TU BELLEZA, TUS REGLAS.",
+      welcome: "Bienvenida a tu espacio",
+      heading: "Tu próximo look empieza aquí.",
+      subheading: "Accede a tu colección personal de belleza.",
+      login: "Iniciar sesión",
+      signup: "Crear cuenta",
+      email: "Correo electrónico",
+      password: "Contraseña",
+      name: "Tu nombre",
+      createPassword: "Crea una contraseña",
+      loginSubmit: "Entrar a MOODÉ ↗",
+      signupSubmit: "Crear mi cuenta ♡",
+      privacy: "Tu espacio personal. Tus preferencias. Tu estilo."
+    },
+    en: {
+      eyebrow: "BEAUTY, YOUR WAY",
+      description: "Discover new ways to express yourself with makeup recommendations inspired by your style and mood.",
+      featureOne: "Your style",
+      featureTwo: "Your looks",
+      featureThree: "Your mood",
+      footer: "YOUR BEAUTY, YOUR RULES.",
+      welcome: "Welcome to your space",
+      heading: "Your next look starts here.",
+      subheading: "Access your personal beauty collection.",
+      login: "Sign in",
+      signup: "Create account",
+      email: "Email address",
+      password: "Password",
+      name: "Your name",
+      createPassword: "Create a password",
+      loginSubmit: "Enter MOODÉ ↗",
+      signupSubmit: "Create my account ♡",
+      privacy: "Your personal space. Your preferences. Your style."
+    }
+  };
 
+  const text = copy[currentLanguage];
+
+  const elements = {
+    authEyebrow: text.eyebrow,
+    authDescription: text.description,
+    authFeatureOne: text.featureOne,
+    authFeatureTwo: text.featureTwo,
+    authFeatureThree: text.featureThree,
+    authFooter: text.footer,
+    authWelcome: text.welcome,
+    authHeading: text.heading,
+    authSubheading: text.subheading,
+    authShowLogin: text.login,
+    authShowSignup: text.signup,
+    loginEmailLabel: text.email,
+    signupEmailLabel: text.email,
+    loginPasswordLabel: text.password,
+    signupNameLabel: text.name,
+    signupPasswordLabel: text.createPassword,
+    loginSubmit: text.loginSubmit,
+    signupSubmit: text.signupSubmit,
+    authPrivacy: text.privacy
+  };
+
+  Object.entries(elements).forEach(([id, value]) => {
+    const element = document.getElementById(id);
+    if (!element) return;
+
+    if (id === "loginSubmit" || id === "signupSubmit") {
+      element.textContent = value;
+    } else {
+      element.textContent = value;
+    }
+  });
+
+  const authLanguageButton = document.getElementById("authLanguageToggle");
+  const languageButton = document.getElementById("languageToggle");
+
+  [authLanguageButton, languageButton].forEach((button) => {
+    if (button) {
+      button.textContent = currentLanguage === "es" ? "EN" : "ES";
+    }
+  });
+
+  const authThemeButton = document.getElementById("authThemeToggle");
+  const themeButton = document.getElementById("themeToggle");
+  const isDark = document.documentElement.classList.contains("dark");
+
+  [authThemeButton, themeButton].forEach((button) => {
+    if (button) button.textContent = isDark ? "☀️" : "🌙";
+  });
+}
 function applyLanguage() {
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
@@ -209,6 +339,7 @@ async function startCamera() {
   }
 }
 
+
 function capturePhoto() {
   const video = document.getElementById("camera");
   const canvas = document.getElementById("photoCanvas");
@@ -226,6 +357,8 @@ function capturePhoto() {
   canvas.height = video.videoHeight;
 
   const context = canvas.getContext("2d");
+  if (!context) return;
+
   context.save();
   context.translate(canvas.width, 0);
   context.scale(-1, 1);
@@ -235,9 +368,78 @@ function capturePhoto() {
   canvas.classList.remove("hidden");
   video.classList.add("hidden");
   photoCaptured = true;
+
   status.textContent = t("photoSuccess");
   message.textContent = t("captureDone");
 }
+
+function loadUploadedPhoto(file) {
+  const video = document.getElementById("camera");
+  const canvas = document.getElementById("photoCanvas");
+  const status = document.getElementById("photoStatus");
+  const message = document.getElementById("cameraMessage");
+
+  if (!file || !canvas || !status || !message) return;
+
+  if (!file.type.startsWith("image/")) {
+    status.textContent = "Selecciona una imagen válida.";
+    return;
+  }
+
+  const image = new Image();
+  const objectUrl = URL.createObjectURL(file);
+
+  image.onload = () => {
+    const maxSize = 1200;
+    const scale = Math.min(
+      1,
+      maxSize / Math.max(image.naturalWidth, image.naturalHeight)
+    );
+
+    canvas.width = Math.round(image.naturalWidth * scale);
+    canvas.height = Math.round(image.naturalHeight * scale);
+
+    const context = canvas.getContext("2d");
+
+    if (!context) {
+      URL.revokeObjectURL(objectUrl);
+      status.textContent = "No se pudo procesar la foto.";
+      return;
+    }
+
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    canvas.classList.remove("hidden");
+    if (video) video.classList.add("hidden");
+
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((track) => track.stop());
+      cameraStream = null;
+    }
+
+    photoCaptured = true;
+    status.textContent = currentLanguage === "en"
+      ? "Photo selected successfully."
+      : "¡Foto seleccionada correctamente!";
+
+    message.textContent = currentLanguage === "en"
+      ? "Your selected photo is ready."
+      : "Tu fotografía está lista.";
+
+    URL.revokeObjectURL(objectUrl);
+  };
+
+  image.onerror = () => {
+    URL.revokeObjectURL(objectUrl);
+    status.textContent = currentLanguage === "en"
+      ? "Could not load this image."
+      : "No se pudo cargar la imagen.";
+  };
+
+  image.src = objectUrl;
+}
+
 
 function selectMood(mood) {
   selectedMood = mood;
@@ -256,6 +458,7 @@ function selectMood(mood) {
   }
 }
 
+
 function generateLook() {
   const recommendation = document.getElementById("recommendation");
   if (!recommendation) return;
@@ -273,37 +476,125 @@ function generateLook() {
   }
 
   const look = window.MOODE_RECOMMENDATIONS?.[selectedMood];
-  const aiResult = window.MOODE_AI?.analyze(selectedMood, true);
+  const aiResult = window.MOODE_AI?.analyze(selectedMood, true, currentLanguage);
 
   if (!look || !aiResult) {
     recommendation.classList.remove("hidden");
     recommendation.textContent = currentLanguage === "es"
-      ? "No se pudo generar la recomendación. Comprueba los archivos de looks e IA."
-      : "Could not generate the recommendation. Check the looks and AI files.";
+      ? "No se pudo generar la recomendación."
+      : "Could not generate the recommendation.";
     return;
   }
 
+  const preferences = {
+    skinType: document.getElementById("skinType")?.value || "normal",
+    occasion: document.getElementById("occasion")?.value || "daily",
+    coverage: document.getElementById("coverage")?.value || "light",
+    style: document.getElementById("makeupStyle")?.value || "natural"
+  };
+
+  const productSuggestions = {
+    es: {
+      skinType: {
+        dry: "Prepara la piel con una crema hidratante.",
+        oily: "Prueba una base ligera de acabado mate.",
+        combination: "Combina hidratación con productos ligeros.",
+        normal: "Mantén una preparación equilibrada de la piel."
+      },
+      occasion: {
+        daily: "Para el día a día, prioriza productos fáciles de aplicar.",
+        work: "Para estudiar o trabajar, elige un look cómodo y duradero.",
+        date: "Para una cita, destaca un rasgo que te encante.",
+        party: "Para una fiesta, puedes intensificar los ojos o los labios."
+      },
+      coverage: {
+        light: "Cobertura ligera",
+        medium: "Cobertura media",
+        full: "Cobertura alta"
+      },
+      style: {
+        natural: "Estilo natural",
+        glow: "Acabado luminoso",
+        elegant: "Estilo elegante",
+        creative: "Estilo creativo"
+      }
+    },
+    en: {
+      skinType: {
+        dry: "Prepare your skin with a moisturizing cream.",
+        oily: "Try a lightweight matte-finish foundation.",
+        combination: "Combine hydration with lightweight products.",
+        normal: "Keep your skin preparation balanced."
+      },
+      occasion: {
+        daily: "For everyday wear, choose easy-to-apply products.",
+        work: "For university or work, choose a comfortable, long-lasting look.",
+        date: "For a date, highlight a feature you love.",
+        party: "For a party, you can emphasize your eyes or lips."
+      },
+      coverage: {
+        light: "Light coverage",
+        medium: "Medium coverage",
+        full: "Full coverage"
+      },
+      style: {
+        natural: "Natural style",
+        glow: "Glowy finish",
+        elegant: "Elegant style",
+        creative: "Creative style"
+      }
+    }
+  };
+
+  const tips = productSuggestions[currentLanguage];
+  const translatedLook = currentLanguage === "en"
+    ? (look.translations?.en || look)
+    : look;
+
   currentLook = {
     mood: selectedMood,
-    title: look.title,
-    text: look.text,
+    title: translatedLook.title,
+    text: translatedLook.text,
     palette: aiResult.palette,
     finish: aiResult.finish,
     products: aiResult.products,
+    preferences,
+    personalizedTips: [
+      tips.skinType[preferences.skinType],
+      tips.occasion[preferences.occasion],
+      tips.coverage[preferences.coverage],
+      tips.style[preferences.style]
+    ],
+    language: currentLanguage,
     date: new Date().toISOString()
   };
 
-  const palette = currentLook.palette.join(", ");
-  const products = currentLook.products.map((product) => `<li class="mb-1">${product}</li>`).join("");
+  const escapeHTML = (value) => String(value).replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+
+  const palette = currentLook.palette.map(escapeHTML).join(", ");
+  const products = currentLook.products
+    .map((product) => `<li class="mb-1">${escapeHTML(product)}</li>`)
+    .join("");
+  const personalizedTips = currentLook.personalizedTips
+    .map((tip) => `<li class="mb-2">${escapeHTML(tip)}</li>`)
+    .join("");
 
   recommendation.innerHTML = `
-    <p class="text-xs uppercase tracking-widest opacity-60">MOODÉ AI</p>
-    <h3 class="text-2xl font-serif mt-2">${currentLook.title}</h3>
-    <p class="mt-3">${currentLook.text}</p>
+    <p class="text-xs uppercase tracking-widest opacity-60">MOODÉ BEAUTY</p>
+    <h3 class="text-2xl font-serif mt-2">${escapeHTML(currentLook.title)}</h3>
+    <p class="mt-3">${escapeHTML(currentLook.text)}</p>
     <p class="mt-4"><strong>${t("palette")}:</strong> ${palette}</p>
-    <p class="mt-2"><strong>${t("finish")}:</strong> ${currentLook.finish}</p>
+    <p class="mt-2"><strong>${t("finish")}:</strong> ${escapeHTML(currentLook.finish)}</p>
     <p class="mt-4 font-semibold">${t("products")}:</p>
     <ul class="list-disc pl-5 mt-2">${products}</ul>
+    <p class="mt-5 font-semibold">${currentLanguage === "es" ? "Tu recomendación personalizada" : "Your personalized recommendation"}</p>
+    <ul class="list-disc pl-5 mt-2">${personalizedTips}</ul>
     <p class="text-xs opacity-60 mt-4">${t("aiNote")}</p>
     <button id="saveCurrentLookButton" type="button" class="moode-gradient mt-5 w-full rounded-full px-5 py-3 font-semibold">${t("saveLook")}</button>
   `;
@@ -311,59 +602,171 @@ function generateLook() {
   recommendation.classList.remove("hidden");
 }
 
-function saveCurrentLook() {
+async function saveCurrentLook() {
   if (!currentLook) return;
 
-  const saved = JSON.parse(localStorage.getItem("moodeSavedLooks") || "[]");
-  saved.unshift(currentLook);
-  localStorage.setItem("moodeSavedLooks", JSON.stringify(saved.slice(0, 50)));
-
-  const history = JSON.parse(localStorage.getItem("moodeHistory") || "[]");
-  history.unshift({
-    mood: currentLook.mood,
-    title: currentLook.title,
-    date: currentLook.date
-  });
-  localStorage.setItem("moodeHistory", JSON.stringify(history.slice(0, 100)));
+  if (!currentUser) {
+    alert(
+      currentLanguage === "en"
+        ? "Please sign in to save your look."
+        : "Inicia sesión para guardar tu look."
+    );
+    return;
+  }
 
   const button = document.getElementById("saveCurrentLookButton");
-  if (button) button.textContent = t("savedSuccess");
-  renderSavedLooks();
+  if (button) button.disabled = true;
+
+  try {
+    // Guardar el look en Supabase asociado a la cuenta actual.
+    const { error: savedError } = await supabase
+      .from("saved_looks")
+      .insert({
+        user_id: currentUser.id,
+        mood: currentLook.mood,
+        title: currentLook.title,
+        description: currentLook.text,
+        palette: currentLook.palette,
+        finish: currentLook.finish,
+        products: currentLook.products
+      });
+
+    if (savedError) throw savedError;
+
+    // Registrar la recomendación en el historial.
+    const { error: historyError } = await supabase
+      .from("look_history")
+      .insert({
+        user_id: currentUser.id,
+        mood: currentLook.mood,
+        title: currentLook.title
+      });
+
+    if (historyError) {
+      console.error("Error guardando el historial:", historyError);
+      alert(
+        currentLanguage === "en"
+          ? "Your look was saved, but the history could not be updated."
+          : "Tu look se guardó, pero no se pudo actualizar el historial."
+      );
+    } else {
+      // Mantener una copia local como respaldo.
+      const saved = JSON.parse(
+        localStorage.getItem("moodeSavedLooks") || "[]"
+      );
+
+      saved.unshift(currentLook);
+      localStorage.setItem(
+        "moodeSavedLooks",
+        JSON.stringify(saved.slice(0, 50))
+      );
+
+      const history = JSON.parse(
+        localStorage.getItem("moodeHistory") || "[]"
+      );
+
+      history.unshift({
+        mood: currentLook.mood,
+        title: currentLook.title,
+        date: currentLook.date
+      });
+
+      localStorage.setItem(
+        "moodeHistory",
+        JSON.stringify(history.slice(0, 100))
+      );
+
+      if (button) {
+        button.textContent = t("savedSuccess");
+      }
+
+      await renderSavedLooks();
+    }
+  } catch (error) {
+    console.error("Error guardando el look en Supabase:", error);
+
+    alert(
+      currentLanguage === "en"
+        ? "We couldn't save your look. Please try again."
+        : "No pudimos guardar tu look. Revisa la conexión e inténtalo de nuevo."
+    );
+  } finally {
+    if (button) button.disabled = false;
+  }
 }
 
-function renderSavedLooks() {
+async function renderSavedLooks() {
   const container = document.getElementById("savedLooksContainer");
   const empty = document.getElementById("savedLooksEmpty");
+
   if (!container || !empty) return;
 
-  const saved = JSON.parse(localStorage.getItem("moodeSavedLooks") || "[]");
+  let saved = [];
+
+  if (currentUser) {
+    const { data, error } = await supabase
+      .from("saved_looks")
+      .select("id, mood, title, description, palette, finish, products, created_at")
+      .eq("user_id", currentUser.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error cargando los looks guardados:", error);
+      empty.classList.remove("hidden");
+
+      const emptyText = empty.querySelector("p");
+      if (emptyText) {
+        emptyText.textContent =
+          currentLanguage === "en"
+            ? "We couldn't load your saved looks. Please try again."
+            : "No pudimos cargar tus looks guardados. Inténtalo de nuevo.";
+      }
+
+      return;
+    }
+
+    saved = (data || []).map((look) => ({
+      ...look,
+      text: look.description || "",
+      date: look.created_at
+    }));
+  }
+
   container.innerHTML = "";
 
   saved.forEach((look) => {
     const card = document.createElement("article");
-    card.className = "rounded-2xl border border-pink-200 p-5 shadow-sm";
+    card.className =
+      "rounded-2xl border border-pink-200 p-5 shadow-sm";
+
     const title = document.createElement("h3");
     title.className = "font-serif text-xl";
-    title.textContent = look.title;
+    title.textContent = look.title || "";
+
     const mood = document.createElement("p");
     mood.className = "mt-2 text-sm opacity-70";
-    mood.textContent = `${t("selectedMood")} ${moodNames[look.mood]?.[currentLanguage] || look.mood}`;
+    mood.textContent =
+      `${t("selectedMood")} ${
+        moodNames[look.mood]?.[currentLanguage] || look.mood || ""
+      }`;
+
     const description = document.createElement("p");
     description.className = "mt-3 text-sm";
-    description.textContent = look.text;
+    description.textContent = look.text || "";
+
     card.append(title, mood, description);
     container.appendChild(card);
   });
 
   empty.classList.toggle("hidden", saved.length > 0);
+
   const emptyText = empty.querySelector("p");
   if (emptyText) emptyText.textContent = t("savedEmpty");
+
   const heading = empty.querySelector("h2");
   if (heading) heading.textContent = t("savedTitle");
 }
 
-const savedTheme = localStorage.getItem("moodeTheme");
-document.documentElement.classList.toggle("dark", savedTheme === "dark");
 
 document.addEventListener("click", (event) => {
   const button = event.target.closest("button");
@@ -375,51 +778,289 @@ document.addEventListener("click", (event) => {
   }
 
   switch (button.id) {
-    case "logoButton":
+    case "themeToggle":
+    case "authThemeToggle": {
+      const isDark = !document.documentElement.classList.contains("dark");
+
+      document.documentElement.classList.toggle("dark", isDark);
+      localStorage.setItem("moodeTheme", isDark ? "dark" : "light");
+
+      applyAuthLanguage();
+      break;
+    }
+
+    case "languageToggle":
+    case "authLanguageToggle": {
+      currentLanguage = currentLanguage === "es" ? "en" : "es";
+      localStorage.setItem("moodeLanguage", currentLanguage);
+
+      applyLanguage();
+      applyAuthLanguage();
+      break;
+    }
+
     case "homeButton":
+    case "logoButton":
       showPage("home");
       break;
+
     case "scannerNavButton":
     case "startExperienceButton":
     case "savedGoScanner":
       showPage("scanner");
       break;
+
     case "savedButton":
       showPage("saved");
       break;
+
     case "profileButton":
       showPage("profile");
       break;
-    case "themeToggle": {
-      const isDark = !document.documentElement.classList.contains("dark");
-      document.documentElement.classList.toggle("dark", isDark);
-      localStorage.setItem("moodeTheme", isDark ? "dark" : "light");
-      button.textContent = isDark ? "☀️" : "🌙";
-      break;
-    }
-    case "languageToggle":
-      currentLanguage = currentLanguage === "es" ? "en" : "es";
-      localStorage.setItem("moodeLanguage", currentLanguage);
-      applyLanguage();
-      break;
+
     case "startCameraButton":
       startCamera();
       break;
+      case "uploadPhotoButton":
+  document.getElementById("photoUpload")?.click();
+  break;
+
     case "captureButton":
       capturePhoto();
       break;
+
     case "generateLookButton":
       generateLook();
       break;
+
     case "saveCurrentLookButton":
       saveCurrentLook();
       break;
   }
 });
 
+
+const savedTheme = localStorage.getItem("moodeTheme");
+document.documentElement.classList.toggle("dark", savedTheme === "dark");
+
 const themeButton = document.getElementById("themeToggle");
 if (themeButton) {
   themeButton.textContent = savedTheme === "dark" ? "☀️" : "🌙";
 }
 
+const authThemeButton = document.getElementById("authThemeToggle");
+if (authThemeButton) {
+  authThemeButton.textContent = savedTheme === "dark" ? "☀️" : "🌙";
+}
+
+
 applyLanguage();
+
+let currentUser = null;
+
+function showAuthMessage(message, isError = false) {
+  const element = document.getElementById("authMessage");
+  if (!element) return;
+
+  element.textContent = message;
+  element.classList.toggle("text-red-600", isError);
+  element.classList.toggle("text-gray-600", !isError);
+}
+
+function showAuthMode(mode) {
+  const loginForm = document.getElementById("loginForm");
+  const signupForm = document.getElementById("signupForm");
+  const loginButton = document.getElementById("authShowLogin");
+  const signupButton = document.getElementById("authShowSignup");
+
+  if (!loginForm || !signupForm) return;
+
+  const isLogin = mode === "login";
+
+  loginForm.classList.toggle("hidden", !isLogin);
+  signupForm.classList.toggle("hidden", isLogin);
+
+  loginButton?.classList.toggle("bg-white", isLogin);
+  loginButton?.classList.toggle("shadow-sm", isLogin);
+  loginButton?.classList.toggle("text-gray-800", isLogin);
+  signupButton?.classList.toggle("bg-white", !isLogin);
+  signupButton?.classList.toggle("shadow-sm", !isLogin);
+  signupButton?.classList.toggle("text-gray-800", !isLogin);
+
+  showAuthMessage("");
+}
+
+function showAuthenticatedApp(user) {
+  currentUser = user;
+
+  const authPage = document.getElementById("authPage");
+  const app = document.getElementById("app");
+
+  authPage?.classList.add("hidden");
+  app?.classList.remove("hidden");
+
+  renderSavedLooks();
+  applyLanguage();
+}
+
+function showLoginScreen() {
+  currentUser = null;
+
+  document.getElementById("app")?.classList.add("hidden");
+  document.getElementById("authPage")?.classList.remove("hidden");
+
+  showAuthMode("login");
+  showAuthMessage(
+    currentLanguage === "en"
+      ? "Sign in or create your personal account."
+      : "Inicia sesión o crea tu cuenta personal."
+  );
+}
+
+document.addEventListener("click", async (event) => {
+  const button = event.target.closest("button");
+  if (!button) return;
+
+  if (button.id === "authShowLogin") {
+    showAuthMode("login");
+    return;
+  }
+
+  if (button.id === "authShowSignup") {
+    showAuthMode("signup");
+    return;
+  }
+
+  if (button.id === "logoutButton") {
+    button.disabled = true;
+
+    const { error } = await supabase.auth.signOut();
+
+    button.disabled = false;
+
+    if (error) {
+      showAuthMessage(error.message, true);
+      return;
+    }
+
+    showLoginScreen();
+  }
+});
+
+document.addEventListener("change", (event) => {
+  if (event.target.id !== "photoUpload") return;
+
+  const file = event.target.files?.[0];
+
+  if (file) {
+    loadUploadedPhoto(file);
+  }
+
+  event.target.value = "";
+});
+
+
+document.addEventListener("submit", async (event) => {
+  if (event.target.id !== "loginForm" && event.target.id !== "signupForm") {
+    return;
+  }
+
+  event.preventDefault();
+
+  const form = event.target;
+  const submitButton = form.querySelector('button[type="submit"]');
+
+  if (submitButton) submitButton.disabled = true;
+
+  showAuthMessage(
+    currentLanguage === "en"
+      ? "Please wait..."
+      : "Un momento, estamos procesando tu solicitud..."
+  );
+
+  try {
+    const formData = new FormData(form);
+    const email = String(formData.get("email") || "").trim();
+    const password = String(formData.get("password") || "");
+
+    if (form.id === "signupForm") {
+      const name = String(formData.get("name") || "").trim();
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            display_name: name
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.session && data.user) {
+        showAuthenticatedApp(data.user);
+        showAuthMessage(
+          currentLanguage === "en"
+            ? "Your account was created successfully."
+            : "¡Tu cuenta se creó correctamente!"
+        );
+      } else {
+        showAuthMode("login");
+        showAuthMessage(
+          currentLanguage === "en"
+            ? "Account created. Check your email to confirm your account, then sign in."
+            : "Cuenta creada. Revisa tu correo para confirmar la cuenta y después inicia sesión."
+        );
+      }
+    } else {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) throw error;
+
+      if (data.user) {
+        showAuthenticatedApp(data.user);
+      }
+    }
+  } catch (error) {
+    console.error("Error de autenticación MOODÉ:", error);
+
+    showAuthMessage(
+      error.message ||
+        (currentLanguage === "en"
+          ? "We couldn't complete the request. Please try again."
+          : "No pudimos completar la solicitud. Inténtalo de nuevo."),
+      true
+    );
+  } finally {
+    if (submitButton) submitButton.disabled = false;
+  }
+});
+
+async function initializeAuthentication() {
+  try {
+    const { data, error } = await supabase.auth.getSession();
+
+    if (error) throw error;
+
+    if (data.session?.user) {
+      showAuthenticatedApp(data.session.user);
+    } else {
+      showLoginScreen();
+    }
+  } catch (error) {
+    console.error("Error al recuperar la sesión:", error);
+    showLoginScreen();
+    showAuthMessage(
+      currentLanguage === "en"
+        ? "Unable to verify your session. Check your Supabase configuration and connection."
+        : "No pudimos verificar tu sesión. Revisa la configuración de Supabase y tu conexión.",
+      true
+    );
+  }
+}
+applyAuthLanguage();
+initializeAuthentication();
