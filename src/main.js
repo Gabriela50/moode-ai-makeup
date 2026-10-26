@@ -3,6 +3,7 @@ import "../data/looks.js";
 import { App } from "./App.js";
 import "./output.css";
 import { supabase } from "./supabase.js";
+import { detectFace } from "./face-detection.js";
 const rootElement = document.getElementById("root");
 if (rootElement) {
   rootElement.innerHTML = App();
@@ -76,6 +77,10 @@ const translations = {
     cameraError: "No se pudo abrir la cámara. Revisa los permisos del navegador.",
     photoSuccess: "Foto capturada correctamente.",
     captureDone: "Captura completada.",
+    faceChecking: "Analizando el rostro...",
+    faceDetected: "Rostro detectado. Ya podemos preparar tu look.",
+    faceNotDetected: "No encontramos un rostro. Prueba con una foto frontal y buena iluminación.",
+    faceDetectionError: "No se pudo analizar el rostro. Puedes intentar otra foto.",
     selectedMood: "Tu mood seleccionado:",
     palette: "Paleta de colores",
     finish: "Acabado",
@@ -146,6 +151,10 @@ const translations = {
     cameraError: "Could not open the camera. Check browser permissions.",
     photoSuccess: "Photo captured successfully.",
     captureDone: "Capture complete.",
+    faceChecking: "Analyzing face...",
+    faceDetected: "Face detected. Your look can now be prepared.",
+    faceNotDetected: "No face found. Try a front-facing photo with good lighting.",
+    faceDetectionError: "The face could not be analyzed. You can try another photo.",
     selectedMood: "Your selected mood:",
     palette: "Color palette",
     finish: "Finish",
@@ -340,6 +349,29 @@ async function startCamera() {
 }
 
 
+
+async function analyzeCapturedFace(canvas, status, message) {
+  if (!canvas || !status || !message) return;
+
+  status.textContent = t("faceChecking");
+
+  try {
+    const result = await detectFace(canvas);
+
+    if (result.detected) {
+      status.textContent = t("faceDetected");
+      message.textContent = t("faceDetected");
+    } else {
+      status.textContent = t("faceNotDetected");
+      message.textContent = t("faceNotDetected");
+    }
+  } catch (error) {
+    console.error("Error al analizar el rostro:", error);
+    status.textContent = t("faceDetectionError");
+    message.textContent = t("faceDetectionError");
+  }
+}
+
 function capturePhoto() {
   const video = document.getElementById("camera");
   const canvas = document.getElementById("photoCanvas");
@@ -371,6 +403,7 @@ function capturePhoto() {
 
   status.textContent = t("photoSuccess");
   message.textContent = t("captureDone");
+  void analyzeCapturedFace(canvas, status, message);
 }
 
 function loadUploadedPhoto(file) {
@@ -427,6 +460,7 @@ function loadUploadedPhoto(file) {
       ? "Your selected photo is ready."
       : "Tu fotografía está lista.";
 
+    void analyzeCapturedFace(canvas, status, message);
     URL.revokeObjectURL(objectUrl);
   };
 
