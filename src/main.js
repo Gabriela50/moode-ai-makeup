@@ -45,6 +45,16 @@ const translations = {
     skinDry: "Seca",
     skinOily: "Grasa",
     skinCombination: "Mixta",
+    skinToneLabel: "¿Cuál es tu tono de piel?",
+    toneLight: "Claro",
+    toneMedium: "Medio",
+    toneTan: "Moreno",
+    toneDeep: "Profundo",
+    undertoneLabel: "¿Cuál es tu subtono?",
+    undertoneUnknown: "No lo sé",
+    undertoneWarm: "Cálido",
+    undertoneCool: "Frío",
+    undertoneNeutral: "Neutro",
     occasionLabel: "¿Para qué ocasión?",
     occasionDaily: "Día a día",
     occasionWork: "Universidad o trabajo",
@@ -119,6 +129,16 @@ const translations = {
     skinDry: "Dry",
     skinOily: "Oily",
     skinCombination: "Combination",
+    skinToneLabel: "What is your skin tone?",
+    toneLight: "Light",
+    toneMedium: "Medium",
+    toneTan: "Tan",
+    toneDeep: "Deep",
+    undertoneLabel: "What is your undertone?",
+    undertoneUnknown: "I don't know",
+    undertoneWarm: "Warm",
+    undertoneCool: "Cool",
+    undertoneNeutral: "Neutral",
     occasionLabel: "What is the occasion?",
     occasionDaily: "Everyday",
     occasionWork: "University or work",
@@ -503,14 +523,8 @@ function generateLook() {
     return;
   }
 
-  if (!photoCaptured) {
-    recommendation.classList.remove("hidden");
-    recommendation.textContent = t("takePhoto");
-    return;
-  }
-
   const look = window.MOODE_RECOMMENDATIONS?.[selectedMood];
-  const aiResult = window.MOODE_AI?.analyze(selectedMood, true, currentLanguage);
+  const aiResult = window.MOODE_AI?.analyze(selectedMood, false, currentLanguage);
 
   if (!look || !aiResult) {
     recommendation.classList.remove("hidden");
@@ -522,6 +536,8 @@ function generateLook() {
 
   const preferences = {
     skinType: document.getElementById("skinType")?.value || "normal",
+    skinTone: document.getElementById("skinTone")?.value || "medium",
+    skinUndertone: document.getElementById("skinUndertone")?.value || "unknown",
     occasion: document.getElementById("occasion")?.value || "daily",
     coverage: document.getElementById("coverage")?.value || "light",
     style: document.getElementById("makeupStyle")?.value || "natural"
@@ -534,6 +550,18 @@ function generateLook() {
         oily: "Prueba una base ligera de acabado mate.",
         combination: "Combina hidratación con productos ligeros.",
         normal: "Mantén una preparación equilibrada de la piel."
+      },
+      skinTone: {
+        light: "En pieles claras, prueba los tonos en la mandíbula y comprueba el resultado con luz natural.",
+        medium: "En pieles medias, compara varios tonos en la mandíbula antes de elegir la base.",
+        tan: "En pieles morenas, busca una base que se funda con el tono del cuello.",
+        deep: "En pieles profundas, busca tonos que respeten la profundidad y el matiz natural de tu piel."
+      },
+      skinUndertone: {
+        unknown: "Prueba los tonos con luz natural; no necesitas conocer tu subtono para empezar.",
+        warm: "Explora tonos cálidos y dorados, comprobando cómo armonizan con tu piel.",
+        cool: "Prueba tonos de matiz frío o rosado y observa cuál se integra mejor.",
+        neutral: "Compara tonos neutros y verifica que la base se funda con tu piel."
       },
       occasion: {
         daily: "Para el día a día, prioriza productos fáciles de aplicar.",
@@ -559,6 +587,18 @@ function generateLook() {
         oily: "Try a lightweight matte-finish foundation.",
         combination: "Combine hydration with lightweight products.",
         normal: "Keep your skin preparation balanced."
+      },
+      skinTone: {
+        light: "For light skin, test foundation along the jawline and check it in natural light.",
+        medium: "For medium skin, compare shades along the jawline before choosing a foundation.",
+        tan: "For tan skin, look for a foundation that blends with your neck.",
+        deep: "For deep skin, choose shades that respect your skin's natural depth and undertone."
+      },
+      skinUndertone: {
+        unknown: "Test shades in natural light; you do not need to know your undertone to begin.",
+        warm: "Explore warm or golden shades and see how they harmonize with your skin.",
+        cool: "Try cool or rosy shades and check which blends most naturally.",
+        neutral: "Compare neutral shades and check that the foundation blends into your skin."
       },
       occasion: {
         daily: "For everyday wear, choose easy-to-apply products.",
@@ -595,6 +635,8 @@ function generateLook() {
     preferences,
     personalizedTips: [
       tips.skinType[preferences.skinType],
+      tips.skinTone[preferences.skinTone],
+      tips.skinUndertone[preferences.skinUndertone],
       tips.occasion[preferences.occasion],
       tips.coverage[preferences.coverage],
       tips.style[preferences.style]

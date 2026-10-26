@@ -33,6 +33,22 @@ export function ScannerComponent() {
             <option value="combination" data-i18n="skinCombination">Mixta</option>
           </select>
 
+          <label for="skinTone" class="mt-5 block text-sm font-semibold" data-i18n="skinToneLabel">¿Cuál es tu tono de piel?</label>
+          <select id="skinTone" class="mt-2 w-full rounded-2xl border border-pink-200 bg-white p-3 text-sm text-gray-800 dark:bg-gray-900 dark:text-white">
+            <option value="light" data-i18n="toneLight">Claro</option>
+            <option value="medium" data-i18n="toneMedium">Medio</option>
+            <option value="tan" data-i18n="toneTan">Moreno</option>
+            <option value="deep" data-i18n="toneDeep">Profundo</option>
+          </select>
+
+          <label for="skinUndertone" class="mt-5 block text-sm font-semibold" data-i18n="undertoneLabel">¿Cuál es tu subtono?</label>
+          <select id="skinUndertone" class="mt-2 w-full rounded-2xl border border-pink-200 bg-white p-3 text-sm text-gray-800 dark:bg-gray-900 dark:text-white">
+            <option value="unknown" data-i18n="undertoneUnknown">No lo sé</option>
+            <option value="warm" data-i18n="undertoneWarm">Cálido</option>
+            <option value="cool" data-i18n="undertoneCool">Frío</option>
+            <option value="neutral" data-i18n="undertoneNeutral">Neutro</option>
+          </select>
+
           <label for="occasion" class="mt-5 block text-sm font-semibold" data-i18n="occasionLabel">¿Para qué ocasión?</label>
           <select id="occasion" class="mt-2 w-full rounded-2xl border border-pink-200 bg-white p-3 text-sm text-gray-800 dark:bg-gray-900 dark:text-white">
             <option value="daily" data-i18n="occasionDaily">Día a día</option>
