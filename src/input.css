@@ -277,16 +277,22 @@ button {
   }
 
   /* Cámara y resultado */
-
   #camera,
   #photoCanvas {
     display: block;
     width: 100%;
     max-width: 100%;
     max-height: 520px;
-    object-fit: contain;
     border-radius: 24px;
     background: #f7e8f1;
+  }
+
+  #camera {
+    object-fit: cover;
+  }
+
+  #photoCanvas {
+    object-fit: contain;
   }
 
   #recommendation:not(.hidden) {
@@ -541,4 +547,75 @@ html.dark #authPage #authWelcome {
 
 html.dark #authPage #authMessage {
   color: #e8d7ec;
+}
+
+/* MOODE PROFILE REDESIGN — estilos propios */
+#profilePage > section {
+  background:
+    radial-gradient(ellipse at 10% 0%, #ffe0ef 0, transparent 38%),
+    radial-gradient(ellipse at 100% 20%, #e8dcff 0, transparent 35%),
+    #fff9fc !important;
+  min-height: 100vh;
+  padding-top: 2rem !important;
+  padding-bottom: 3rem !important;
+}
+
+#profilePage > section > div {
+  max-width: 1100px !important;
+  gap: 1.5rem !important;
+}
+
+#profilePage article {
+  border-radius: 24px !important;
+  border-color: #f2c6dc !important;
+  box-shadow: 0 12px 35px rgba(130, 65, 100, .08) !important;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+#profilePage article:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 38px rgba(130, 65, 100, .13) !important;
+}
+
+#profilePage h2 {
+  font-size: clamp(2.2rem, 5vw, 3.5rem) !important;
+  line-height: 1.15 !important;
+}
+
+#profilePage h3 {
+  font-size: 1.65rem !important;
+}
+
+#profilePage img[alt*="Gabriela"] {
+  width: 150px !important;
+  height: 150px !important;
+  border: 4px solid white;
+  box-shadow: 0 8px 28px rgba(130, 65, 100, .18);
+}
+
+#profilePage .grid {
+  gap: 1.25rem !important;
+}
+
+#profilePage .rounded-\[2rem\] {
+  border-radius: 30px !important;
+  box-shadow: 0 16px 42px rgba(130, 65, 100, .10) !important;
+}
+
+.dark #profilePage > section {
+  background:
+    radial-gradient(ellipse at 10% 0%, #49283f 0, transparent 40%),
+    radial-gradient(ellipse at 100% 20%, #302748 0, transparent 35%),
+    #17131b !important;
+}
+
+@media (max-width: 640px) {
+  #profilePage > section {
+    padding: 1rem !important;
+  }
+
+  #profilePage img[alt*="Gabriela"] {
+    width: 120px !important;
+    height: 120px !important;
+  }
 }
