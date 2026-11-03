@@ -74,7 +74,8 @@ export function ScannerComponent() {
         </div>
 
         <div class="rounded-3xl overflow-hidden bg-black aspect-[3/4] relative">
-          <video id="camera" autoplay playsinline class="w-full h-full object-cover"></video>
+          <video id="camera" autoplay playsinline class="w-full h-full object-cover" style="object-fit: cover; transform: scaleX(-1);"></video>
+          <canvas id="makeupOverlay" aria-hidden="true" class="absolute inset-0 w-full h-full object-cover pointer-events-none" style="z-index: 2; transform: none; transform-origin: center center;"></canvas>
           <canvas id="photoCanvas" class="hidden w-full h-full object-cover"></canvas>
         </div>
 
