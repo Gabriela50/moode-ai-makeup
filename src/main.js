@@ -3,7 +3,7 @@ import "../data/looks.js";
 import { App } from "./App.js";
 import "./output.css";
 import { supabase } from "./supabase.js";
-import { detectFace } from "./face-detection.js";
+import { detectFace, detectFaceInVideo } from "./face-detection.js";
 const rootElement = document.getElementById("root");
 if (rootElement) {
   rootElement.innerHTML = App();
@@ -15,6 +15,10 @@ let selectedMood = "";
 let photoCaptured = false;
 let currentLook = null;
 let uploadedPhotoUrl = null;
+let makeupFrameId = null;
+let makeupDetectionBusy = false;
+let makeupLastTimestamp = 0;
+
 
 const translations = {
   es: {
@@ -328,8 +332,282 @@ function showPage(page) {
     if (element) element.classList.toggle("hidden", name !== page);
   });
 
+  if (page !== "scanner") {
+    stopLiveMakeup();
+    stopCameraStream();
+  }
   if (page === "saved") renderSavedLooks();
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+
+function stopCameraStream() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach((track) => track.stop());
+    cameraStream = null;
+  }
+}
+
+function stopLiveMakeup() {
+  if (makeupFrameId !== null) {
+    cancelAnimationFrame(makeupFrameId);
+    makeupFrameId = null;
+  }
+
+  makeupDetectionBusy = false;
+
+  const overlay = document.getElementById("makeupOverlay");
+  if (overlay) {
+    const context = overlay.getContext("2d");
+    if (context) context.clearRect(0, 0, overlay.width, overlay.height);
+  }
+}
+
+function drawLiveMakeup(overlay, landmarks) {
+  const ctx = overlay.getContext("2d");
+  if (!ctx || !landmarks?.length) return;
+
+  const w = overlay.width;
+  const h = overlay.height;
+  const p = (i) => {
+    const lm = landmarks[i];
+    if (!lm || !Number.isFinite(lm.x) || !Number.isFinite(lm.y)) {
+      return { x: NaN, y: NaN };
+    }
+    return { x: (1 - lm.x) * w, y: lm.y * h - h * 0.05 };
+  };
+  const palettes = {
+    Radiante: {
+      lip: [232, 55, 105], blush: [248, 92, 133],
+      shadow: [221, 135, 190], shine: [255, 239, 242]
+    },
+    Elegante: {
+      lip: [119, 25, 57], blush: [174, 76, 104],
+      shadow: [94, 58, 111], shine: [255, 224, 231]
+    },
+    Romántica: {
+      lip: [218, 69, 127], blush: [246, 112, 164],
+      shadow: [196, 119, 177], shine: [255, 238, 248]
+    },
+    Tranquila: {
+      lip: [174, 93, 116], blush: [211, 133, 145],
+      shadow: [153, 136, 174], shine: [255, 240, 238]
+    }
+  };
+  const c = palettes[selectedMood] || palettes.Romántica;
+  ctx.clearRect(0, 0, w, h);
+
+  function valid(points) {
+    return points.length > 2 &&
+      points.every(q => Number.isFinite(q.x) && Number.isFinite(q.y));
+  }
+
+  function softSpot(index, edge1, edge2, rgb, alpha, spread = 1) {
+    const center = p(index), a = p(edge1), b = p(edge2);
+    if (![center, a, b].every(q => Number.isFinite(q.x) && Number.isFinite(q.y))) return;
+    const rx = Math.max(5, Math.hypot(a.x - b.x, a.y - b.y) * 0.58 * spread);
+    const ry = rx * 0.68;
+    ctx.save();
+    ctx.translate(center.x, center.y);
+    ctx.scale(1, ry / rx);
+    const g = ctx.createRadialGradient(0, 0, rx * 0.04, 0, 0, rx);
+    g.addColorStop(0, `rgba(${rgb.join(",")},${alpha})`);
+    g.addColorStop(0.42, `rgba(${rgb.join(",")},${alpha * 0.62})`);
+    g.addColorStop(0.76, `rgba(${rgb.join(",")},${alpha * 0.18})`);
+    g.addColorStop(1, `rgba(${rgb.join(",")},0)`);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(0, 0, rx, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function polygon(indices, fill, blur = 0, size = 1) {
+    const pts = indices.map(p);
+    if (!valid(pts)) return;
+    if (size !== 1) {
+      const cx = pts.reduce((sum, q) => sum + q.x, 0) / pts.length;
+      const cy = pts.reduce((sum, q) => sum + q.y, 0) / pts.length;
+      for (const q of pts) {
+        q.x = cx + (q.x - cx) * size;
+        q.y = cy + (q.y - cy) * size;
+      }
+    }
+    ctx.save();
+    ctx.filter = blur ? `blur(${blur}px)` : "none";
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length; i++) {
+      ctx.lineTo(pts[i].x, pts[i].y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = fill;
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function liner(indices, color, thickness) {
+    const pts = indices.map(p);
+    if (!valid(pts)) return;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length - 1; i++) {
+      const mid = {
+        x: (pts[i].x + pts[i + 1].x) / 2,
+        y: (pts[i].y + pts[i + 1].y) / 2
+      };
+      ctx.quadraticCurveTo(pts[i].x, pts[i].y, mid.x, mid.y);
+    }
+    const last = pts[pts.length - 1];
+    ctx.lineTo(last.x, last.y);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = thickness;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  ctx.save();
+  ctx.globalCompositeOperation = "source-over";
+
+  // Rubor en capas: el degradado elimina el borde circular artificial.
+  softSpot(205, 123, 187, c.blush, 0.07, 0.65);
+  softSpot(425, 352, 411, c.blush, 0.07, 0.65);
+
+  // Sombra suave en párpados, con menor opacidad en los bordes.
+  polygon([33, 246, 161, 160, 159, 158, 157, 173, 133, 155, 154, 153, 145, 144, 163, 7],
+    `rgba(${c.shadow.join(",")},0.025)`, Math.max(1, w * 0.002), 0.78);
+  polygon([362, 398, 384, 385, 386, 387, 388, 466, 263, 249, 390, 373, 374, 380, 381, 382],
+    `rgba(${c.shadow.join(",")},0.025)`, Math.max(1, w * 0.002), 0.78);
+
+  // Labios siguiendo el contorno facial detectado.
+  polygon(
+    [61,185,40,39,37,0,267,269,270,409,291,375,321,405,314,17,84,181,91,146],
+    `rgba(${c.lip.join(",")},0.12)`, 0, 0.78
+  );
+
+  // Reflejo labial estrecho, solo en el centro para simular gloss.
+  const upper = [p(82), p(13), p(312)];
+  if (valid(upper)) {
+    const g = ctx.createLinearGradient(0, upper[0].y, 0, upper[1].y);
+    g.addColorStop(0, `rgba(${c.shine.join(",")},0)`);
+    g.addColorStop(0.48, `rgba(${c.shine.join(",")},0.48)`);
+    g.addColorStop(1, `rgba(${c.shine.join(",")},0)`);
+    liner([82, 13, 312], g, Math.max(1.5, w * 0.004));
+  }
+
+  // Delineado fino, siguiendo los puntos del ojo.
+  liner([33,246,161,160,159,158,157,173,133],
+    "rgba(48,29,43,0.20)", Math.max(1, w * 0.0017));
+  liner([362,398,384,385,386,387,388,466,263],
+    "rgba(48,29,43,0.20)", Math.max(1, w * 0.0017));
+
+  // Iluminación muy sutil en el puente de la nariz.
+  softSpot(6, 197, 195, [255, 239, 229], 0.09, 0.5);
+
+  ctx.restore();
+}
+async function tryMakeupLive() {
+  const video = document.getElementById("camera");
+  const canvas = document.getElementById("photoCanvas");
+  const message = document.getElementById("cameraMessage");
+  const status = document.getElementById("photoStatus");
+
+  if (!video || !message) return;
+
+  // Volver a la cámara en vivo, aunque antes se haya capturado una foto.
+  if (!cameraStream || !cameraStream.active) {
+    await startCamera();
+  } else {
+    video.srcObject = cameraStream;
+    video.classList.remove("hidden");
+    if (canvas) canvas.classList.add("hidden");
+    photoCaptured = false;
+
+    try {
+      await video.play();
+      startLiveMakeup();
+      message.textContent = currentLanguage === "es"
+        ? "Prueba tu maquillaje en tiempo real."
+        : "Try your makeup in real time.";
+      if (status) status.textContent = message.textContent;
+    } catch (error) {
+      console.error("No se pudo iniciar la prueba en vivo:", error);
+      message.textContent = t("cameraError");
+    }
+  }
+
+  // Si se abrió la cámara desde cero, startCamera inicia el seguimiento.
+  if (cameraStream && cameraStream.active && !photoCaptured) {
+    video.classList.remove("hidden");
+    if (canvas) canvas.classList.add("hidden");
+  }
+}
+
+function startLiveMakeup() {
+  stopLiveMakeup();
+
+  const video = document.getElementById("camera");
+  const overlay = document.getElementById("makeupOverlay");
+
+  if (!video || !overlay) return;
+
+  // Reflejar el lienzo igual que la cámara para alinear el maquillaje.
+  overlay.style.transform = "none";
+  overlay.style.transformOrigin = "center center";
+
+  const frame = async (timestamp) => {
+    if (
+      !cameraStream ||
+      photoCaptured ||
+      video.classList.contains("hidden") ||
+      !video.isConnected
+    ) {
+      stopLiveMakeup();
+      return;
+    }
+
+    if (video.videoWidth && video.videoHeight) {
+      const targetWidth = video.videoWidth;
+      const targetHeight = video.videoHeight;
+      if (overlay.width !== targetWidth || overlay.height !== targetHeight) {
+        overlay.width = targetWidth;
+        overlay.height = targetHeight;
+      }
+
+      // Evita ejecutar dos inferencias simultáneamente.
+      if (!makeupDetectionBusy && timestamp > makeupLastTimestamp) {
+        makeupDetectionBusy = true;
+        makeupLastTimestamp = timestamp;
+
+        try {
+          const result = await detectFaceInVideo(video, timestamp);
+
+          if (cameraStream && !photoCaptured && result.detected) {
+            drawLiveMakeup(overlay, result.landmarks);
+          } else {
+            const context = overlay.getContext("2d");
+            if (context) context.clearRect(0, 0, overlay.width, overlay.height);
+          }
+        } catch (error) {
+          console.error("No se pudo actualizar el filtro facial:", error);
+        } finally {
+          makeupDetectionBusy = false;
+        }
+      }
+    }
+
+    if (cameraStream && !photoCaptured) {
+      makeupFrameId = requestAnimationFrame(frame);
+    } else {
+      stopLiveMakeup();
+    }
+  };
+
+  makeupLastTimestamp = 0;
+  makeupFrameId = requestAnimationFrame(frame);
 }
 
 async function startCamera() {
@@ -355,9 +633,11 @@ async function startCamera() {
     });
 
     video.srcObject = cameraStream;
+    await video.play();
     video.classList.remove("hidden");
     if (canvas) canvas.classList.add("hidden");
     photoCaptured = false;
+    startLiveMakeup();
 
     const status = document.getElementById("photoStatus");
     if (status) status.textContent = t("photoRequired");
@@ -411,12 +691,22 @@ function capturePhoto() {
   const context = canvas.getContext("2d");
   if (!context) return;
 
+  // Captura el video y el maquillaje en la misma imagen reflejada.
+  const overlay = document.getElementById("makeupOverlay");
+
   context.save();
   context.translate(canvas.width, 0);
   context.scale(-1, 1);
   context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  if (overlay && overlay.width && overlay.height) {
+    context.drawImage(overlay, 0, 0, canvas.width, canvas.height);
+  }
+
   context.restore();
 
+  stopLiveMakeup();
+  stopCameraStream();
   canvas.classList.remove("hidden");
   video.classList.add("hidden");
   photoCaptured = true;
@@ -463,6 +753,7 @@ function loadUploadedPhoto(file) {
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
+    stopLiveMakeup();
     canvas.classList.remove("hidden");
     if (video) video.classList.add("hidden");
 
@@ -672,6 +963,7 @@ function generateLook() {
     <p class="mt-5 font-semibold">${currentLanguage === "es" ? "Tu recomendación personalizada" : "Your personalized recommendation"}</p>
     <ul class="list-disc pl-5 mt-2">${personalizedTips}</ul>
     <p class="text-xs opacity-60 mt-4">${t("aiNote")}</p>
+    <button id="tryMakeupLiveButton" type="button" class="moode-gradient mt-5 w-full rounded-full px-5 py-3 font-semibold">${currentLanguage === "es" ? "✨ Probar este maquillaje en vivo" : "✨ Try this makeup live"}</button>
     <button id="saveCurrentLookButton" type="button" class="moode-gradient mt-5 w-full rounded-full px-5 py-3 font-semibold">${t("saveLook")}</button>
   `;
 
@@ -880,6 +1172,7 @@ document.addEventListener("click", (event) => {
       showPage("home");
       break;
 
+    case "homeStartButton":
     case "scannerNavButton":
     case "startExperienceButton":
     case "savedGoScanner":
@@ -909,6 +1202,10 @@ document.addEventListener("click", (event) => {
       generateLook();
       break;
 
+    case "tryMakeupLiveButton":
+      void tryMakeupLive();
+      break;
+
     case "saveCurrentLookButton":
       saveCurrentLook();
       break;
@@ -930,9 +1227,9 @@ if (authThemeButton) {
 }
 
 
-applyLanguage();
-
 let currentUser = null;
+
+applyLanguage();
 
 function showAuthMessage(message, isError = false) {
   const element = document.getElementById("authMessage");
