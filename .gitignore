@@ -6,3 +6,7 @@ node_modules/
 dist/
 coverage/
 respaldo-*/
+
+# Dependencias antiguas de la app móvil
+mobile/node_modules.pre-sdk54-attempt/
+mobile/.expo/

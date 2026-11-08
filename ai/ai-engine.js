@@ -1,83 +1,116 @@
 window.MOODE_AI = {
-
-    analyze: function (mood, faceData) {
-
-        const looks = {
-
-            "Radiante": {
-                style: "Glow Radiante",
-                palette: ["Rosa suave", "Champagne", "Melocotón"],
-                finish: "Luminoso",
-                products: [
-                    "Base ligera glow",
-                    "Blush rosado",
-                    "Iluminador champagne",
-                    "Gloss transparente"
-                ]
-            },
-
-            "Elegante": {
-                style: "Elegancia Clásica",
-                palette: ["Nude", "Marrón", "Rojo profundo"],
-                finish: "Satinado",
-                products: [
-                    "Base de cobertura media",
-                    "Sombras neutras",
-                    "Delineador negro",
-                    "Labial rojo elegante"
-                ]
-            },
-
-            "Romántica": {
-                style: "Soft Romantic",
-                palette: ["Rosa", "Malva", "Champagne"],
-                finish: "Suave",
-                products: [
-                    "Base natural",
-                    "Blush rosa",
-                    "Sombra rosada",
-                    "Gloss rosado"
-                ]
-            },
-
-            "Tranquila": {
-                style: "Natural Calm",
-                palette: ["Beige", "Café claro", "Nude"],
-                finish: "Natural",
-                products: [
-                    "BB Cream",
-                    "Bronzer suave",
-                    "Cejas naturales",
-                    "Labial nude"
-                ]
-            }
-
-        };
-
-        const selectedLook = looks[mood];
-
-        if (!selectedLook) {
-            return null;
+  analyze: function (mood, faceData, language = "es") {
+    const looks = {
+      "Radiante": {
+        style: "Glow Radiante",
+        palette: ["Rosa suave", "Champagne", "Melocotón"],
+        finish: "Luminoso",
+        products: [
+          "Base ligera glow",
+          "Blush rosado",
+          "Iluminador champagne",
+          "Gloss transparente"
+        ],
+        en: {
+          style: "Radiant Glow",
+          palette: ["Soft pink", "Champagne", "Peach"],
+          finish: "Luminous",
+          products: [
+            "Lightweight glow foundation",
+            "Rosy blush",
+            "Champagne highlighter",
+            "Clear lip gloss"
+          ]
         }
+      },
+      "Elegante": {
+        style: "Elegancia Clásica",
+        palette: ["Nude", "Marrón", "Rojo profundo"],
+        finish: "Satinado",
+        products: [
+          "Base de cobertura media",
+          "Sombras neutras",
+          "Delineador negro",
+          "Labial rojo elegante"
+        ],
+        en: {
+          style: "Classic Elegance",
+          palette: ["Nude", "Brown", "Deep red"],
+          finish: "Satin",
+          products: [
+            "Medium-coverage foundation",
+            "Neutral eyeshadow",
+            "Black eyeliner",
+            "Elegant red lipstick"
+          ]
+        }
+      },
+      "Romántica": {
+        style: "Soft Romantic",
+        palette: ["Rosa", "Malva", "Champagne"],
+        finish: "Suave",
+        products: [
+          "Base natural",
+          "Blush rosa",
+          "Sombra rosada",
+          "Gloss rosado"
+        ],
+        en: {
+          style: "Soft Romantic",
+          palette: ["Pink", "Mauve", "Champagne"],
+          finish: "Soft",
+          products: [
+            "Natural-finish foundation",
+            "Pink blush",
+            "Pink eyeshadow",
+            "Pink lip gloss"
+          ]
+        }
+      },
+      "Tranquila": {
+        style: "Natural Calm",
+        palette: ["Beige", "Café claro", "Nude"],
+        finish: "Natural",
+        products: [
+          "BB Cream",
+          "Bronzer suave",
+          "Cejas naturales",
+          "Labial nude"
+        ],
+        en: {
+          style: "Natural Calm",
+          palette: ["Beige", "Light brown", "Nude"],
+          finish: "Natural",
+          products: [
+            "BB cream",
+            "Soft bronzer",
+            "Natural brow product",
+            "Nude lipstick"
+          ]
+        }
+      }
+    };
 
-        return {
+    const selectedLook = looks[mood];
 
-            mood: mood,
-
-            faceAnalyzed: !!faceData,
-
-            style: selectedLook.style,
-
-            palette: selectedLook.palette,
-
-            finish: selectedLook.finish,
-
-            products: selectedLook.products,
-
-            status: "Análisis generado por MOODÉ AI"
-
-        };
-
+    if (!selectedLook) {
+      return null;
     }
 
+    const result = language === "en" && selectedLook.en
+      ? selectedLook.en
+      : selectedLook;
+
+    return {
+      mood,
+      faceAnalyzed: false,
+      style: result.style,
+      palette: result.palette,
+      finish: result.finish,
+      products: result.products,
+      status: language === "en"
+        ? "Recommendation generated by MOODÉ AI"
+        : "Recomendación generada por MOODÉ AI"
+    };
+  }
 };

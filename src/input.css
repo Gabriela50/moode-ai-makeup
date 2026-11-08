@@ -42,3 +42,580 @@ button {
         #202d3d
     );
 }
+
+/* =========================================
+   MOODÉ — PREMIUM BEAUTY REDESIGN
+   ========================================= */
+
+   :root {
+    --moode-pink: #ed4b91;
+    --moode-rose: #f7a1c5;
+    --moode-purple: #9670dc;
+    --moode-ink: #352239;
+    --moode-cream: #fff8fb;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    color: var(--moode-ink);
+    background:
+      radial-gradient(ellipse at 8% 8%, #ffe0ef 0, transparent 34%),
+      radial-gradient(ellipse at 94% 20%, #eee2ff 0, transparent 30%),
+      linear-gradient(145deg, #fffafd, #fff4f8 55%, #faf5ff);
+    font-family: "DM Sans", sans-serif;
+    min-height: 100vh;
+  }
+
+  button, input, textarea, select {
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+    transition: transform .22s ease, box-shadow .22s ease,
+                background .22s ease, opacity .22s ease;
+  }
+
+  button:hover {
+    transform: translateY(-2px);
+  }
+
+  button:focus-visible,
+  input:focus-visible {
+    outline: 3px solid #ed4b9180;
+    outline-offset: 3px;
+  }
+
+  h1, h2, h3, .font-serif {
+    font-family: "Playfair Display", Georgia, serif;
+    letter-spacing: -.035em;
+  }
+
+  ::selection {
+    background: #f7b5d4;
+    color: #49213b;
+  }
+
+  /* Fondos y superficies */
+
+  #root {
+    min-height: 100vh;
+  }
+
+  #authPage {
+    min-height: 100vh;
+    overflow: hidden;
+    position: relative;
+    isolation: isolate;
+    background:
+      radial-gradient(ellipse at 5% 5%, #ffd5e8 0, transparent 40%),
+      radial-gradient(ellipse at 95% 85%, #dcd0ff 0, transparent 38%),
+      linear-gradient(135deg, #fff9fc, #fceaf4 52%, #f4efff);
+  }
+
+  #authPage::before,
+  #authPage::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(2px);
+  }
+
+  #authPage::before {
+    width: 300px;
+    height: 300px;
+    top: -130px;
+    right: -75px;
+    background: linear-gradient(135deg, #ff9cc9a8, #c8a9ff70);
+  }
+
+  #authPage::after {
+    width: 230px;
+    height: 230px;
+    bottom: -100px;
+    left: -70px;
+    background: linear-gradient(135deg, #f5a8cf80, #d9b8ff90);
+  }
+
+  /* Marca */
+
+  #authPage h1,
+  #authPage h2 {
+    color: #542443;
+  }
+
+  #authPage input,
+  #app input,
+  #app select {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #ead5e2;
+    border-radius: 15px;
+    padding: 13px 15px;
+    background: #ffffffc9;
+    color: #38263a;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+
+  #authPage input:focus,
+  #app input:focus,
+  #app select:focus {
+    border-color: var(--moode-pink);
+    box-shadow: 0 0 0 4px #ed4b9118;
+    outline: none;
+  }
+
+  /* Tarjetas de acceso y contenido */
+
+  #authPage form,
+  #app article,
+  #app .beauty-card {
+    border-color: #f0d9e8;
+  }
+
+  #authPage form {
+    border-radius: 25px;
+  }
+
+  #app article {
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+
+  #app article:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 40px #6f315b12;
+  }
+
+  /* Botones principales */
+
+  .moode-gradient {
+    color: white !important;
+    border: 0 !important;
+    background: linear-gradient(110deg, #e84491, #bc5acb 58%, #9173e8) !important;
+    box-shadow: 0 10px 24px #d54c963b;
+  }
+
+  .moode-gradient:hover {
+    box-shadow: 0 14px 30px #c33f8e50;
+    filter: saturate(1.1);
+  }
+
+  #authPage button[type="submit"] {
+    width: 100%;
+    min-height: 49px;
+    border: 0;
+    border-radius: 999px;
+    color: white;
+    font-weight: 700;
+    background: linear-gradient(110deg, #ed4b91, #c15bc9 65%, #9670dc);
+    box-shadow: 0 9px 22px #d64c9238;
+  }
+
+  #authPage button[type="submit"]:hover {
+    box-shadow: 0 13px 28px #d64c9252;
+  }
+
+  /* Navegación */
+
+  #app nav {
+    border-color: #f0d9e8;
+    background: #fffaffd9;
+    backdrop-filter: blur(18px);
+  }
+
+  #app nav button,
+  #app header button {
+    border-radius: 999px;
+    transition: color .2s ease, background .2s ease;
+  }
+
+  #app nav button:hover,
+  #app header button:hover {
+    color: #d83d88;
+    background-color: #fce3f0;
+  }
+
+  /* Áreas de contenido */
+
+  #homePage,
+  #scannerPage,
+  #savedPage,
+  #profilePage {
+    animation: moode-appear .4s ease both;
+  }
+
+  #app h1 {
+    line-height: 1.08;
+  }
+
+  #app h2 {
+    line-height: 1.15;
+  }
+
+  #app .moodChoice {
+    border: 1px solid #f0cfe1;
+    border-radius: 18px;
+    background: linear-gradient(145deg, #fff, #fff2f8);
+    box-shadow: 0 5px 16px #74345c0a;
+  }
+
+  #app .moodChoice:hover {
+    border-color: #ed83b5;
+    box-shadow: 0 9px 23px #d84b941b;
+  }
+
+  #app .moodChoice[aria-pressed="true"] {
+    border-color: #e94a96;
+    background: linear-gradient(135deg, #ffe0ef, #eee1ff);
+    box-shadow: 0 7px 20px #d84b9425;
+  }
+
+  /* Cámara y resultado */
+  #camera,
+  #photoCanvas {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    max-height: 520px;
+    border-radius: 24px;
+    background: #f7e8f1;
+  }
+
+  #camera {
+    object-fit: cover;
+  }
+
+  #photoCanvas {
+    object-fit: contain;
+  }
+
+  #recommendation:not(.hidden) {
+    padding: clamp(18px, 4vw, 30px);
+    border: 1px solid #f0cfe1;
+    border-radius: 24px;
+    background: linear-gradient(145deg, #fffafd, #fff0f7 65%, #f4edff);
+    box-shadow: 0 15px 40px #73385b10;
+    overflow-wrap: anywhere;
+  }
+
+  #recommendation h3 {
+    color: #a33376;
+  }
+
+  /* Colección */
+
+  #savedLooksContainer article {
+    background: linear-gradient(145deg, #ffffff, #fff3f9);
+    border-radius: 22px;
+    box-shadow: 0 8px 24px #77345c0b;
+  }
+
+  #savedLooksContainer article h3 {
+    color: #a33376;
+  }
+
+  /* Modo oscuro */
+
+  html.dark body {
+    color: #f7eaf5;
+    background:
+      radial-gradient(ellipse at 5% 5%, #492442 0, transparent 38%),
+      radial-gradient(ellipse at 95% 20%, #30234f 0, transparent 34%),
+      linear-gradient(145deg, #1b1421, #241725 55%, #1d192b);
+  }
+
+  html.dark #authPage {
+    color: #f8eaf4;
+    background:
+      radial-gradient(ellipse at 5% 5%, #4c2544 0, transparent 40%),
+      radial-gradient(ellipse at 95% 85%, #342651 0, transparent 38%),
+      linear-gradient(135deg, #211622, #2b1c2c 55%, #211b30);
+  }
+
+  html.dark #authPage h1,
+  html.dark #authPage h2,
+  html.dark #app h1,
+  html.dark #app h2,
+  html.dark #app h3 {
+    color: #ffe0f0;
+  }
+
+  html.dark #authPage form,
+  html.dark #app article,
+  html.dark #recommendation:not(.hidden) {
+    color: #f7eaf5;
+    border-color: #57374f;
+    background: linear-gradient(145deg, #302131, #34243a 65%, #29223d);
+  }
+
+  html.dark #authPage input,
+  html.dark #app input,
+  html.dark #app select {
+    color: #fff2fa;
+    border-color: #67465f;
+    background: #281d2d;
+  }
+
+  html.dark #authPage input::placeholder,
+  html.dark #app input::placeholder {
+    color: #c7afc2;
+  }
+
+  html.dark #app nav {
+    color: #f7eaf5;
+    border-color: #50354c;
+    background: #251b2be8;
+  }
+
+  html.dark #app nav button:hover,
+  html.dark #app header button:hover {
+    color: #ffacd1;
+    background: #493047;
+  }
+
+  html.dark #app .moodChoice {
+    color: #f9eaf5;
+    border-color: #62415a;
+    background: linear-gradient(145deg, #302131, #34253d);
+  }
+
+  html.dark #app .moodChoice[aria-pressed="true"] {
+    border-color: #ef82ba;
+    background: linear-gradient(135deg, #643451, #46345f);
+  }
+
+  html.dark #savedLooksContainer article {
+    background: linear-gradient(145deg, #302131, #34243a);
+  }
+
+  html.dark #savedLooksContainer article h3,
+  html.dark #recommendation h3 {
+    color: #ffacd1;
+  }
+
+  /* Accesibilidad y móvil */
+
+  @keyframes moode-appear {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 640px) {
+    body {
+      font-size: 15px;
+    }
+
+    #authPage {
+      padding: 22px 16px;
+    }
+
+    #authPage form {
+      border-radius: 22px;
+    }
+
+    #app {
+      overflow-x: clip;
+    }
+
+    #app main,
+    #app section {
+      max-width: 100%;
+    }
+
+    #app h1 {
+      font-size: clamp(2.15rem, 10vw, 3.3rem);
+    }
+
+    #app h2 {
+      font-size: clamp(1.65rem, 7vw, 2.3rem);
+    }
+
+    #app button {
+      min-height: 42px;
+    }
+
+    #camera,
+    #photoCanvas {
+      max-height: 60vh;
+    }
+
+    #recommendation:not(.hidden) {
+      padding: 18px;
+      border-radius: 20px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      animation-duration: .01ms !important;
+      transition-duration: .01ms !important;
+    }
+  }
+
+
+/* MOODE: modo oscuro elegante, sin cambiar la distribucion */
+html.dark #authPage {
+  background: #1b1421 !important;
+  color: #f8eaf5 !important;
+}
+
+html.dark #authPage section.relative.overflow-hidden {
+  background: linear-gradient(135deg, #38263f, #30263f 55%, #253348) !important;
+}
+
+html.dark #authPage section.relative.overflow-hidden h1 {
+  color: #fff0fa !important;
+}
+
+html.dark #authPage section.relative.overflow-hidden p {
+  color: #e0cce5 !important;
+}
+
+html.dark #authPage section.relative.overflow-hidden > div > div > div {
+  border-color: #ffffff24 !important;
+  background-color: #ffffff12 !important;
+}
+
+html.dark #authPage section.mx-auto.w-full.max-w-md > div.rounded-3xl {
+  background: #2a2031 !important;
+  border-color: #49364f !important;
+  color: #f8eaf5 !important;
+  box-shadow: 0 20px 60px #00000030 !important;
+}
+
+html.dark #authPage h2,
+html.dark #authPage label {
+  color: #f3e5f2 !important;
+}
+
+html.dark #authPage #authSubheading,
+html.dark #authPage #authPrivacy {
+  color: #c5b2ca !important;
+}
+
+html.dark #authPage input {
+  background: #201827 !important;
+  color: #fff5fc !important;
+  border-color: #59435f !important;
+}
+
+html.dark #authPage input::placeholder {
+  color: #ad9ab4 !important;
+}
+
+html.dark #authPage input:focus {
+  border-color: #d49bc9 !important;
+  box-shadow: 0 0 0 4px #c98db720 !important;
+}
+
+html.dark #authPage #authShowLogin,
+html.dark #authPage #authShowSignup {
+  color: #ead8ed;
+}
+
+html.dark #authPage #authShowLogin.bg-white,
+html.dark #authPage #authShowSignup.bg-white {
+  background: #49364f !important;
+  color: #fff4fc !important;
+}
+
+html.dark #authPage #authLanguageToggle,
+html.dark #authPage #authThemeToggle {
+  background: #302438 !important;
+  color: #f8eaf5 !important;
+  border-color: #59435f !important;
+}
+
+html.dark #authPage #authWelcome {
+  color: #e1a9d3 !important;
+}
+
+html.dark #authPage #authMessage {
+  color: #e8d7ec;
+}
+
+/* MOODE PROFILE REDESIGN — estilos propios */
+#profilePage > section {
+  background:
+    radial-gradient(ellipse at 10% 0%, #ffe0ef 0, transparent 38%),
+    radial-gradient(ellipse at 100% 20%, #e8dcff 0, transparent 35%),
+    #fff9fc !important;
+  min-height: 100vh;
+  padding-top: 2rem !important;
+  padding-bottom: 3rem !important;
+}
+
+#profilePage > section > div {
+  max-width: 1100px !important;
+  gap: 1.5rem !important;
+}
+
+#profilePage article {
+  border-radius: 24px !important;
+  border-color: #f2c6dc !important;
+  box-shadow: 0 12px 35px rgba(130, 65, 100, .08) !important;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+#profilePage article:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 38px rgba(130, 65, 100, .13) !important;
+}
+
+#profilePage h2 {
+  font-size: clamp(2.2rem, 5vw, 3.5rem) !important;
+  line-height: 1.15 !important;
+}
+
+#profilePage h3 {
+  font-size: 1.65rem !important;
+}
+
+#profilePage img[alt*="Gabriela"] {
+  width: 150px !important;
+  height: 150px !important;
+  border: 4px solid white;
+  box-shadow: 0 8px 28px rgba(130, 65, 100, .18);
+}
+
+#profilePage .grid {
+  gap: 1.25rem !important;
+}
+
+#profilePage .rounded-\[2rem\] {
+  border-radius: 30px !important;
+  box-shadow: 0 16px 42px rgba(130, 65, 100, .10) !important;
+}
+
+.dark #profilePage > section {
+  background:
+    radial-gradient(ellipse at 10% 0%, #49283f 0, transparent 40%),
+    radial-gradient(ellipse at 100% 20%, #302748 0, transparent 35%),
+    #17131b !important;
+}
+
+@media (max-width: 640px) {
+  #profilePage > section {
+    padding: 1rem !important;
+  }
+
+  #profilePage img[alt*="Gabriela"] {
+    width: 120px !important;
+    height: 120px !important;
+  }
+}
