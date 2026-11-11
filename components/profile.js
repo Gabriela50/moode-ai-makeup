@@ -15,7 +15,7 @@ export function ProfileComponent() {
             <div class="relative shrink-0">
               <div class="rounded-full bg-white p-1.5 shadow-xl ring-1 ring-rose-200">
                 <img
-                  src="/assets/avatar-gabriela.png"
+                  src="./assets/avatar-gabriela.png"
                   alt="Avatar personal de Gabriela"
                   class="h-32 w-32 rounded-full object-cover object-center sm:h-40 sm:w-40"
                   onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"

@@ -12,7 +12,7 @@ export function HomeComponent() {
 
         <div class="relative overflow-hidden rounded-[2rem] border border-white/70 bg-white/60 p-2 shadow-2xl shadow-pink-300/30">
           <img
-            src="/assets/avatar-gabriela.png"
+            src="./assets/avatar-gabriela.png"
             alt="Avatar de MOODÉ"
             class="moode-avatar-image block aspect-[3/4] w-full rounded-[1.6rem] object-cover object-center"
             fetchpriority="high"
