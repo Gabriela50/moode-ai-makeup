@@ -1,25 +1,34 @@
-import React from "react";
-import { SafeAreaView, StyleSheet } from "react-native";
+import React, { useEffect } from "react";
+import { SafeAreaView, StyleSheet, PermissionsAndroid, Platform } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { WebView } from "react-native-webview";
 
 export default function App() {
+  useEffect(() => {
+    if (Platform.OS === "android") {
+      PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: "Cámara de MOODÉ",
+          message: "Permite usar la cámara para probar maquillaje virtual.",
+          buttonPositive: "Permitir",
+          buttonNegative: "Cancelar"
+        }
+      ).catch(console.warn);
+    }
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
       <WebView
-        source={{ uri: "file:///android_asset/moode-web/index-react.html" }}
+        source={{ uri: "https://moode-ai-makeup-pw71.vercel.app/" }}
         style={styles.webview}
         originWhitelist={["*"]}
         javaScriptEnabled
         domStorageEnabled
-        allowFileAccess
-        allowFileAccessFromFileURLs
-        allowUniversalAccessFromFileURLs
-        mixedContentMode="always"
         mediaPlaybackRequiresUserAction={false}
         allowsInlineMediaPlayback
-        onPermissionRequest={(event) => event.grant()}
       />
     </SafeAreaView>
   );
