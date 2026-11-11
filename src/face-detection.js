@@ -10,12 +10,12 @@ async function getFaceLandmarker() {
   if (!landmarkerPromise) {
     landmarkerPromise = (async () => {
       const vision = await FilesetResolver.forVisionTasks(
-        "/mediapipe/wasm"
+        `${import.meta.env.BASE_URL}mediapipe/wasm`
       );
 
       return FaceLandmarker.createFromOptions(vision, {
         baseOptions: {
-          modelAssetPath: "/models/face_landmarker.task",
+          modelAssetPath: `${import.meta.env.BASE_URL}models/face_landmarker.task`,
           delegate: "CPU"
         },
         runningMode: "IMAGE",
@@ -64,12 +64,12 @@ async function getVideoFaceLandmarker() {
   if (!videoLandmarkerPromise) {
     videoLandmarkerPromise = (async () => {
       const vision = await FilesetResolver.forVisionTasks(
-        "/mediapipe/wasm"
+        `${import.meta.env.BASE_URL}mediapipe/wasm`
       );
 
       return FaceLandmarker.createFromOptions(vision, {
         baseOptions: {
-          modelAssetPath: "/models/face_landmarker.task",
+          modelAssetPath: `${import.meta.env.BASE_URL}models/face_landmarker.task`,
           delegate: "CPU"
         },
         runningMode: "VIDEO",
